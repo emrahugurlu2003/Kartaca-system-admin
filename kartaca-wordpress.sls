@@ -269,4 +269,9 @@ mysql-user:
     - require:
       - mysql_database: mysql-database
 
+mysql-service:
+  service.running:
+    - name: mysql
+    - enable: True
+
 {% endif %}

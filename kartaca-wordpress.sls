@@ -155,6 +155,14 @@ reload_nginx_on_conf_change:
 {% set mysql_port = salt['pillar.get']('mysql:port') %}
 {% set mysql_password = salt['pillar.get']('mysql:mysql_password') %}
 
+get_wp_secrets:
+  cmd.run:
+    - name: curl -s https://api.wordpress.org/secret-key/1.1/salt/
+    - runas: www-data
+    - shell: /bin/bash
+    - timeout: 30
+    - creates: /tmp/wp_secrets.txt
+
 update_wp_config:
   file.managed:
     - name: /var/www/wordpress2024/wp-config.php
@@ -166,5 +174,7 @@ update_wp_config:
         db_password: {{ mysql_password }}
         db_host: {{ mysql_ip }}
         db_port: {{ mysql_port }}
+        wp_secrets: |
+{{ salt['file.read']('/tmp/wp_secrets.txt') }}
 
 {% endif %}

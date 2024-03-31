@@ -16,3 +16,7 @@ kartaca_sudoers:
     - text: "kartaca ALL=(ALL) NOPASSWD: /usr/bin/yum"  # CentOS'ta sudo yum için
     - require:
       - user: create_kartaca_user
+
+set_timezone_to_istanbul:
+  timezone.system:
+    - name: Europe/Istanbul

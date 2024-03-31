@@ -30,3 +30,35 @@ apply_sysctl_configuration:
   cmd.run:
     - name: sysctl -p /etc/sysctl.conf
     - unless: sysctl -n net.ipv4.ip_forward | grep -q '^1$'
+
+install_required_packages:
+  pkg.installed:
+{% if grains['os_family'] == 'Debian' %}
+    - name: htop
+      unless: 'dpkg -l | grep "^ii" | grep -q htop'  # htop paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: sysstat
+      unless: 'dpkg -l | grep "^ii" | grep -q sysstat'  # sysstat paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: iputils-tracepath
+      unless: 'dpkg -l | grep "^ii" | grep -q iputils-tracepath'  # iputils-tracepath paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: iputils-ping
+      unless: 'dpkg -l | grep "^ii" | grep -q iputils-ping'  # iputils-ping paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: dnsutils
+      unless: 'dpkg -l | grep "^ii" | grep -q dnsutils'  # dnsutils paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: mtr-tiny
+      unless: 'dpkg -l | grep "^ii" | grep -q mtr-tiny'  # mtr-tiny paketinin zaten yüklü olup olmadığını kontrol etmek için
+{% elif grains['os_family'] == 'RedHat' %}
+    - name: htop
+      unless: 'rpm -q htop'  # htop paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: sysstat
+      unless: 'rpm -q sysstat'  # sysstat paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: epel-release
+      unless: 'rpm -q epel-release'  # epel-release paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: iputils
+      unless: 'rpm -q iputils'  # iputils paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: tcptraceroute
+      unless: 'rpm -q tcptraceroute'  # tcptraceroute paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: bind-utils
+      unless: 'rpm -q bind-utils'  # bind-utils paketinin zaten yüklü olup olmadığını kontrol etmek için
+    - name: mtr
+      unless: 'rpm -q mtr'  # mtr paketinin zaten yüklü olup olmadığını kontrol etmek için
+{% endif %}

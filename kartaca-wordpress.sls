@@ -62,3 +62,18 @@ install_required_packages:
     - name: mtr
       unless: 'rpm -q mtr'  # mtr paketinin zaten yüklü olup olmadığını kontrol etmek için
 {% endif %}
+
+hashicorp_repo:
+  pkgrepo.managed:
+    - humanname: HashiCorp Official Package Repository
+    - name: deb https://apt.releases.hashicorp.com {{ grains['oscodename'] }} main
+    - dist: {{ grains['oscodename'] }}
+    - file: /etc/apt/sources.list.d/hashicorp.list
+    - key_url: https://apt.releases.hashicorp.com/gpg
+
+install_terraform:
+  pkg.installed:
+    - name: terraform=1.6.4
+    - fromrepo: hashicorp
+    - require:
+      - pkgrepo: hashicorp_repo

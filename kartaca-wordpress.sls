@@ -135,4 +135,8 @@ restart_nginx:
     - watch:
       - file: create_nginx_php_config
 
+download_wordpress:
+  cmd.run:
+    - name: wget -P /tmp https://wordpress.org/latest.tar.gz
+
 {% endif %}

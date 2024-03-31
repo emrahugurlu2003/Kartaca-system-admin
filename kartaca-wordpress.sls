@@ -235,43 +235,75 @@ nginx_rotate_logs:
       - file: nginx_logrotate_config
 
 {% elif grains['os_family'] == 'Debian' %}
+
+{% set mysql_ip = salt['pillar.get']('mysql:ip') %}
+{% set mysql_port = salt['pillar.get']('mysql:port') %}
+{% set database_name = salt['pillar.get']('mysql:database_name') %}
+{% set root_password = salt['pillar.get']('mysql:root_password') %}
+{% set mysql_user_name = salt['pillar.get']('mysql:user_name') %}
+{% set mysql_password = salt['pillar.get']('mysql:mysql_password') %}
+
+# Install MySQL Server Packages
 mysql-server:
   pkg.installed:
     - names:
       - mysql-server
       - mysql-client
 
+# Ensure MySQL Service is Running
 mysql-service:
   service.running:
     - name: mysql
     - enable: True
 
+# Set MySQL Root Password
 mysql-root-password:
   mysql_user.present:
     - name: root
-    - password: "{{ salt['pillar.get']('mysql:root_password') }}"
+    - password: {{ root_password }}
     - connection_charset: utf8mb4
     - host: localhost
 
+# Ensure MySQL User Exists
+mysql-user:
+  mysql_user.present:
+    - name: "{{ mysql_user_name }}"
+    - password: "{{ mysql_password }}"
+    - host: localhost
+    - require:
+      - mysql_root_password
+
+# Create MySQL Database
+create_mysql_database:
+  mysql_database.present:
+    - name: {{ database_name }}
+    - collate: utf8mb4_unicode_ci
+    - connection_charset: utf8mb4
+    - host: {{ mysql_ip }}
+    - port: {{ mysql_port }}
+    - user: root
+    - password: {{ root_password }}
+    - require:
+      - mysql_user
+
+# Ensure MySQL Database Exists
 mysql-database:
   mysql_database.present:
-    - name: "{{ salt['pillar.get']('mysql:database_name') }}"
+    - name: {{ database_name }}
     - collate: utf8mb4_unicode_ci
     - connection_charset: utf8mb4
     - require:
-      - mysql_user: mysql-root-password
+      - mysql_user
 
-mysql-user:
+# Grant MySQL User Privileges
+create_mysql_user:
   mysql_user.present:
-    - name: "{{ salt['pillar.get']('mysql:mysql_user_name') }}"
-    - password: "{{ salt['pillar.get']('mysql:mysql_password') }}"
+    - name: "{{ mysql_user_name }}"
     - host: localhost
+    - password: "{{ mysql_password }}"
+    - connection_charset: utf8mb4
+    - database: {{ database_name }}
+    - privileges: "ALL"
     - require:
-      - mysql_database: mysql-database
-
-mysql-service:
-  service.running:
-    - name: mysql
-    - enable: True
-
+      - mysql_database: create_mysql_database
 {% endif %}

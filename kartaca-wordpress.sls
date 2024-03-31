@@ -153,6 +153,8 @@ reload_nginx_on_conf_change:
 
 {% set mysql_ip = salt['pillar.get']('mysql:ip') %}
 {% set mysql_port = salt['pillar.get']('mysql:port') %}
+{% set database_name = salt['pillar.get']('mysql:database_name') %}
+{% set mysql_user_name = salt['pillar.get']('mysql:user_name') %}
 {% set mysql_password = salt['pillar.get']('mysql:mysql_password') %}
 
 get_wp_secrets:
@@ -169,8 +171,8 @@ update_wp_config:
     - source: salt://wordpress/wp-config.php
     - template: jinja
     - context:
-        db_name: wordpress_db
-        db_user: MySQL_Kartaca
+        db_name: {{ database_name }}
+        db_user: {{ mysql_user_name }}
         db_password: {{ mysql_password }}
         db_host: {{ mysql_ip }}
         db_port: {{ mysql_port }}
@@ -232,5 +234,39 @@ nginx_rotate_logs:
     - require:
       - file: nginx_logrotate_config
 
+{% elif grains['os_family'] == 'Debian' %}
+mysql-server:
+  pkg.installed:
+    - names:
+      - mysql-server
+      - mysql-client
+
+mysql-service:
+  service.running:
+    - name: mysql
+    - enable: True
+
+mysql-root-password:
+  mysql_user.present:
+    - name: root
+    - password: "{{ salt['pillar.get']('mysql:root_password') }}"
+    - connection_charset: utf8mb4
+    - host: localhost
+
+mysql-database:
+  mysql_database.present:
+    - name: "{{ salt['pillar.get']('mysql:database_name') }}"
+    - collate: utf8mb4_unicode_ci
+    - connection_charset: utf8mb4
+    - require:
+      - mysql_user: mysql-root-password
+
+mysql-user:
+  mysql_user.present:
+    - name: "{{ salt['pillar.get']('mysql:user_name') }}"
+    - password: "{{ salt['pillar.get']('mysql:user_password') }}"
+    - host: localhost
+    - require:
+      - mysql_database: mysql-database
 
 {% endif %}

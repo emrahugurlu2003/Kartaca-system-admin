@@ -306,4 +306,13 @@ create_mysql_user:
     - privileges: "ALL"
     - require:
       - mysql_database: create_mysql_database
+
+mysql_backup_cron:
+  cron.present:
+    - name: "mysql_backup"
+    - user: root
+    - minute: 0
+    - hour: 2
+    - job: "/usr/bin/mysqldump -u root -p{{ salt['pillar.get']('mysql:root_password') }} --all-databases > /backup/mysql_backup_$(date +\%Y\%m\%d_\%H\%M\%S).sql"
+
 {% endif %}

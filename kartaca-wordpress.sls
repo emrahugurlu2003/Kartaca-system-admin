@@ -184,33 +184,24 @@ create_ssl_certificate:
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
     - creates: /etc/ssl/private/nginx-selfsigned.key
 
-# Nginx yapılandırma dosyasını düzenleme
-edit_nginx_config:
-  file.append:
+# Nginx yapılandırma dosyasını yönetme
+manage_nginx_config:
+  file.managed:
     - name: /etc/nginx/nginx.conf
-    - text: |
-        server {
-            listen 443 ssl;
-            server_name your_domain.com;
-
-            ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-            ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-
-            ssl_protocols TLSv1.2 TLSv1.3;
-            ssl_prefer_server_ciphers on;
-            ssl_ciphers ECDHE+AESGCM:ECDHE+CHACHA20:ECDHE+AES256:ECDHE+AES128:DH+AESGCM:DH+AES256:DH+AES;
-
-            # Diğer SSL ayarları ve site yapılandırması...
-        }
-  - require:
-    - cmd: create_ssl_certificate
+    - source: salt://files/nginx.conf
+    - template: jinja
+    - user: root
+    - group: root
+    - mode: 644
+    - require:
+      - cmd: create_ssl_certificate
 
 # Nginx servisini yeniden başlatma
 restart_nginx:
   service.running:
     - name: nginx
     - watch:
-      - file: edit_nginx_config
+      - file: manage_nginx_config
 
 
 {% endif %}

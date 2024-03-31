@@ -20,3 +20,13 @@ kartaca_sudoers:
 set_timezone_to_istanbul:
   timezone.system:
     - name: Europe/Istanbul
+
+enable_ip_forwarding:
+  file.append:
+    - name: /etc/sysctl.conf
+    - text: "net.ipv4.ip_forward=1"
+
+apply_sysctl_configuration:
+  cmd.run:
+    - name: sysctl -p /etc/sysctl.conf
+    - unless: sysctl -n net.ipv4.ip_forward | grep -q '^1$'

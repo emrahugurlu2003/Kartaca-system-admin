@@ -97,5 +97,42 @@ nginx_service_enabled:
     - require:
       - pkg: install_nginx
 
+# PHP paketlerinin kurulumu
+install_php_packages:
+  pkg.installed:
+    - names:
+      - php
+      - php-fpm
+      - php-mysqlnd
+      - php-json
+      - php-mbstring
+      - php-gd
+      - php-xml
+      - php-curl
+
+# PHP-FPM servisini başlatma ve otomatik başlatma ayarı
+start_php_fpm:
+  service.running:
+    - name: php-fpm
+    - enable: True
+
+# Nginx için PHP konfigürasyon dosyası oluşturma
+create_nginx_php_config:
+  file.managed:
+    - name: /etc/nginx/conf.d/php.conf
+    - source: salt://path/to/php.conf
+    - user: root
+    - group: root
+    - mode: 644
+    - require:
+      - pkg: install_php_packages
+      - service: start_php_fpm
+
+# Nginx servisini yeniden başlatma
+restart_nginx:
+  service.running:
+    - name: nginx
+    - watch:
+      - file: create_nginx_php_config
 
 {% endif %}

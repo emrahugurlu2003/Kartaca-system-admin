@@ -90,4 +90,12 @@ host_entry_{{ ip_suffix }}:
 install_nginx:
   pkg.installed:
     - name: nginx
+
+nginx_service_enabled:
+  service.enabled:
+    - name: nginx
+    - require:
+      - pkg: install_nginx
+
+
 {% endif %}

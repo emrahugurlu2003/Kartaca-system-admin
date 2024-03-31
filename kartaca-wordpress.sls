@@ -216,5 +216,21 @@ nginx_restart_cron:
     - job: systemctl restart nginx
     - identifier: nginx_restart_cron
 
+nginx_logrotate_config:
+  file.managed:
+    - name: /etc/logrotate.d/nginx
+    - source: salt://nginx/logrotate_nginx.conf
+    - user: root
+    - group: root
+    - mode: 644
+    - template: jinja
+
+nginx_rotate_logs:
+  cmd.run:
+    - name: logrotate -f /etc/logrotate.d/nginx
+    - user: root
+    - require:
+      - file: nginx_logrotate_config
+
 
 {% endif %}

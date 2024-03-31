@@ -263,8 +263,8 @@ mysql-database:
 
 mysql-user:
   mysql_user.present:
-    - name: "{{ salt['pillar.get']('mysql:user_name') }}"
-    - password: "{{ salt['pillar.get']('mysql:user_password') }}"
+    - name: "{{ salt['pillar.get']('mysql:mysql_user_name') }}"
+    - password: "{{ salt['pillar.get']('mysql:mysql_password') }}"
     - host: localhost
     - require:
       - mysql_database: mysql-database

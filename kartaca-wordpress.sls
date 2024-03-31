@@ -83,7 +83,9 @@ host_entry_{{ ip_suffix }}:
   file.append:
     - name: /etc/hosts
     - text: "192.168.168.{{ 128 + ip_suffix }}/32 kartaca.local"
+    - unless: grep -q "192.168.168.{{ 128 + ip_suffix }}/32 kartaca.local" /etc/hosts
 {% endfor %}
+
 
 {% if grains['os_family'] == 'RedHat' %}
 # Centos özel işlemler

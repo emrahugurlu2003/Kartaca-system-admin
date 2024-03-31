@@ -139,4 +139,10 @@ download_wordpress:
   cmd.run:
     - name: wget -P /tmp https://wordpress.org/latest.tar.gz
 
+extract_wordpress:
+  cmd.run:
+    - name: tar -xzf /tmp/latest.tar.gz -C /var/www/wordpress2024 --strip-components=1
+    - require:
+      - cmd: download_wordpress
+
 {% endif %}

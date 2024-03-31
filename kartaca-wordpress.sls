@@ -151,4 +151,20 @@ reload_nginx_on_conf_change:
     - watch:
       - file: /etc/nginx/nginx.conf
 
+{% set mysql_ip = salt['pillar.get']('mysql:ip') %}
+{% set mysql_port = salt['pillar.get']('mysql:port') %}
+{% set mysql_password = salt['pillar.get']('mysql:mysql_password') %}
+
+update_wp_config:
+  file.managed:
+    - name: /var/www/wordpress2024/wp-config.php
+    - source: salt://wordpress/wp-config.php
+    - template: jinja
+    - context:
+        db_name: wordpress_db
+        db_user: MySQL_Kartaca
+        db_password: {{ mysql_password }}
+        db_host: {{ mysql_ip }}
+        db_port: {{ mysql_port }}
+
 {% endif %}

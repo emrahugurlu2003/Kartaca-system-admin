@@ -84,3 +84,10 @@ host_entry_{{ ip_suffix }}:
     - name: /etc/hosts
     - text: "192.168.168.{{ 128 + ip_suffix }}/32 kartaca.local"
 {% endfor %}
+
+{% if grains['os_family'] == 'RedHat' %}
+# Centos özel işlemler
+install_nginx:
+  pkg.installed:
+    - name: nginx
+{% endif %}

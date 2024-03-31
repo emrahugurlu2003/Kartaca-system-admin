@@ -145,4 +145,10 @@ extract_wordpress:
     - require:
       - cmd: download_wordpress
 
+reload_nginx_on_conf_change:
+  service.reload:
+    - name: nginx
+    - watch:
+      - file: /etc/nginx/nginx.conf
+
 {% endif %}

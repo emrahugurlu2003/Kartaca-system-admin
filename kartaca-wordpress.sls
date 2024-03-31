@@ -203,5 +203,18 @@ restart_nginx:
     - watch:
       - file: manage_nginx_config
 
+# Nginx servisini durdurma ve yeniden başlatma işlemleri için bir state
+nginx_restart_cron:
+  cron.present:
+    - name: restart_nginx
+    - user: root
+    - minute: 0
+    - hour: 0
+    - daymonth: 1
+    - month: '*'
+    - weekday: '*'
+    - job: systemctl restart nginx
+    - identifier: nginx_restart_cron
+
 
 {% endif %}
